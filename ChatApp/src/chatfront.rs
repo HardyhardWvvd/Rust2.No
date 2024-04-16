@@ -1,3 +1,4 @@
+//This is a test code for creating the front end using Rust and its dependencies. It has not been used anywhere
 use yew:prelude::*;
 
 struct Model{

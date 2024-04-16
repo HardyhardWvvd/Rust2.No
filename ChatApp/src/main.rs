@@ -1,8 +1,10 @@
 #[macro_use] extern crate rocket;
 
 use std::net::Shutdown;
+use rocket::Rocket;
+use rocket::Build;
 
-use rocket::{tokio::sync::broadcast::{channel,Sender, error::RecvError}, serde::{Serialize,Deserialize},State, Shutdown, response::stream::{EventStream, Event}, fs::{relative, FileServer}};
+use rocket::{fs::{relative, FileServer}, response::stream::{Event, EventStream}, serde::{Deserialize, Serialize}, tokio::sync::broadcast::{channel, error::RecvError, Sender}, Rocket, Shutdown as OtherShutdown, State};
 use rocket::form::Form;
 use rocket::tokio::select;
 
@@ -27,8 +29,8 @@ async fn events(queue: &State<Sender<Message>>, mut end: Shutdown)-> EventStream
     let mut rx= queue.subscribe();
     EventStream!{
         loop{
-            let msg= select{
-                msg= rx.recv() => match msg{
+            let msg=select{
+                msg=rx.recv() => match msg{
                     Ok(msg)=> msg,
                     Err(RecvError:;Closed)=> break,
                     Err(RecvError::Lagged(_))=>continue,
@@ -39,7 +41,7 @@ async fn events(queue: &State<Sender<Message>>, mut end: Shutdown)-> EventStream
     }
 }
 
-fn rocket() -> Rocket<Build> {
+fn main() -> Rocket<Build> {
     rocket::build()
         .manage(channel::<Message>(1024).0)
         .mount("/", routes![post, events])
